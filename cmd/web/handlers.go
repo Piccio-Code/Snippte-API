@@ -12,7 +12,7 @@ import (
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	ts, err := template.ParseFS(TemplatesFS, "ui/html/*.html", "ui/html/*.html", "ui/html/partials/*.html")
+	ts, err := template.ParseFS(TemplatesFolder, "*.html", "partials/*.html")
 
 	if err != nil {
 		log.Fatal("Parsing has not worked: ", err)
