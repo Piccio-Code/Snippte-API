@@ -1,18 +1,27 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
+	. "github.com/Piccio-Code/Snippte-API"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	ts, err := template.ParseFS(TemplatesFS, "ui/html/*.html", "ui/html/*.html", "ui/html/partials/*.html")
+
+	if err != nil {
+		log.Fatal("Parsing has not worked: ", err)
 	}
 
-	w.Write([]byte("Hello from Snippetbox"))
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Fatal("Execution has not worked: ", err)
+	}
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
