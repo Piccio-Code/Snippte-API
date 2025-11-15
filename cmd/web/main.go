@@ -10,13 +10,20 @@ import (
 	"strings"
 )
 
+type application struct {
+	infoLog  *log.Logger
+	errorLog *log.Logger
+}
+
 func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	infoLog := log.New(os.Stdout, "INFO:\t", log.LstdFlags)
-	errorLog := log.New(os.Stderr, "ERROR:\t", log.LstdFlags|log.Lshortfile)
+	app := &application{
+		infoLog:  log.New(os.Stdout, "INFO:\t", log.LstdFlags),
+		errorLog: log.New(os.Stderr, "ERROR:\t", log.LstdFlags|log.Lshortfile),
+	}
 
 	mux := http.NewServeMux()
 
@@ -24,20 +31,20 @@ func main() {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", hideStaticMiddleware(fileServer)))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
-	infoLog.Printf("Starting server on %s", *addr)
+	app.infoLog.Printf("Starting server on %s", *addr)
 
 	srv := &http.Server{
 		Addr:     *addr,
 		Handler:  mux,
-		ErrorLog: errorLog,
+		ErrorLog: app.errorLog,
 	}
 
 	err := srv.ListenAndServe()
-	errorLog.Fatal(err)
+	app.errorLog.Println(err)
 }
 
 func hideStaticMiddleware(next http.Handler) http.Handler {
